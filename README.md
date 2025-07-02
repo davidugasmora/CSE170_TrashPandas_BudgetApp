@@ -1,2 +1,2 @@
 # CSE170_TrashPandas_BudgetApp
-A budget app we are doing as an assignement for CSE170 at BYUI
+A budget app made for a proyect assignement for CSE170 at BYUI.
