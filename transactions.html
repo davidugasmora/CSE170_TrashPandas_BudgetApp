@@ -1,0 +1,121 @@
+<!-- transactions.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transactions</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+    .container {
+      padding: 20px;
+      max-width: 414px;
+      margin: auto;
+    }
+    .section-title {
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
+    .toggle-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .toggle-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #000;
+      background: #fff;
+      font-weight: bold;
+    }
+    .toggle-buttons button.active {
+      background: #000;
+      color: #fff;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-weight: bold;
+      border: 1px solid #000;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row > * {
+      flex: 1;
+    }
+    .button {
+      padding: 10px;
+      background: #aaa;
+      color: #000;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 20px;
+      margin: 10px auto;
+      width: 70%;
+    }
+    .graph-placeholder {
+      border: 1px solid #000;
+      height: 200px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .footer {
+      background: #444;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+    }
+    .footer a svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="section-title">TRANSACTIONS</div>
+    <div class="toggle-buttons">
+      <button class="active">income</button>
+      <button>expense</button>
+    </div>
+    <input type="number" placeholder="$ total amount" />
+
+    <div class="section-title">AMOUNT REMAINING</div>
+    <h2><strong>${remaining}</strong></h2>
+
+    <div class="row">
+      <select>
+        <option>category</option>
+      </select>
+      <input type="number" placeholder="$" />
+    </div>
+
+    <div class="button">ADD MORE</div>
+
+    <div class="graph-placeholder">graph of category balances</div>
+  </div>
+
+  <div class="footer">
+    <a href="dashboard.html" title="Go to Dashboard">
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
+  </div>
+
+</body>
+</html>

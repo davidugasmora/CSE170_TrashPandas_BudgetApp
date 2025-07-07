@@ -1,283 +1,107 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rocket Budget App</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f4f8fb;
       margin: 0;
-      color: #333;
-    }
-    header {
-      background: #0d47a1;
-      color: white;
-      text-align: center;
-      padding: 20px;
-      font-size: 1.8em;
+      padding: 0;
+      background: #fff;
+      color: #000;
     }
     .container {
-      max-width: 480px;
+      padding: 20px;
+      max-width: 414px;
       margin: auto;
-      padding: 20px;
     }
-    .balance-summary,
-    .goal-section,
-    .budget-section,
-    .filter-section,
-    .tip-section {
-      background: #e3f2fd;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 20px;
+    .section-title {
+      font-weight: bold;
+      margin: 20px 0 10px;
     }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 1em;
+    h2 {
+      margin-bottom: 10px;
     }
-    button {
-      background: #0d47a1;
-      color: white;
-      border: none;
-    }
-    button:hover {
-      background: #0b3c91;
-    }
-    .transactions {
-      margin-top: 20px;
-      max-height: 200px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .transaction {
+    .graph-placeholder {
+      border: 1px solid #000;
+      height: 200px;
+      margin: 20px 0;
       display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .income { color: green; }
-    .expense { color: red; }
-    canvas { margin-top: 20px; }
-    #loginScreen {
-      max-width: 360px;
-      margin: 80px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+    }
+    .overview-boxes {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .overview-boxes .box {
+      border: 1px solid #000;
+      flex: 1;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .transaction-list {
+      background: #eee;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .transaction-item {
+      background: #ccc;
+      height: 40px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+    .footer {
+      background: #444;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+    }
+    .footer a svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
     }
   </style>
 </head>
 <body>
-  <header>🚀 Rocket Budget App</header>
 
-  <div id="loginScreen">
-    <h2>Welcome!</h2>
-    <p>Enter your username to access your budget:</p>
-    <input type="text" id="usernameInput" placeholder="Username" />
-    <button onclick="loginUser()">Login</button>
-  </div>
+  <div class="container">
+    <div class="section-title">CURRENT BALANCE:</div>
+    <h2><strong>${balance}</strong></h2>
 
-  <div class="container" id="appContainer" style="display:none">
-    <div class="balance-summary">
-      <h2 id="balance">Balance: $0.00</h2>
-      <p id="monthlyIncome">Monthly Income: $0.00</p>
-      <p id="monthlyExpenses">Monthly Expenses: $0.00</p>
+    <div class="graph-placeholder">graph of category balances</div>
+
+    <div class="section-title">MONTHLY OVERVIEW</div>
+    <div class="overview-boxes">
+      <div class="box">INCOME</div>
+      <div class="box">EXPENSES</div>
     </div>
 
-    <input type="number" id="amount" placeholder="Amount" />
-    <input type="text" id="category" placeholder="Category (e.g. Groceries)" />
-    <select id="type">
-      <option value="income">Income</option>
-      <option value="expense">Expense</option>
-    </select>
-    <label><input type="checkbox" id="recurring" /> Recurring Monthly</label>
-    <button onclick="addTransaction()">Add Transaction</button>
-
-    <div class="goal-section">
-      <input type="number" id="goal" placeholder="Set Saving Goal ($)" />
-      <button onclick="setGoal()">Set Goal</button>
-      <p id="goalStatus"></p>
-    </div>
-
-    <div class="budget-section">
-      <h4>💰 Budget Recommendations</h4>
-      <input type="number" id="userIncome" placeholder="Enter Monthly Income" />
-      <button onclick="setMonthlyIncome()">Set Income</button>
-      <div id="suggestedBudgets"></div>
-    </div>
-
-    <div class="filter-section">
-      <label for="monthFilter">Filter by Month:</label>
-      <select id="monthFilter" onchange="updateUI()">
-        <option value="all">All</option>
-      </select>
-    </div>
-
-    <div class="transactions" id="transactionList"></div>
-
-    <canvas id="ratioChart"></canvas>
-    <canvas id="trendChart"></canvas>
-
-    <div class="tip-section">
-      <h4>💡 Savings Tip</h4>
-      <p id="aiTip"></p>
+    <div class="section-title">MONTHLY TRANSACTIONS</div>
+    <div class="transaction-list">
+      <div class="transaction-item"></div>
+      <div class="transaction-item"></div>
+      <div class="transaction-item"></div>
+      <div class="transaction-item"></div>
     </div>
   </div>
 
-  <script>
-    let currentUser = null;
-    let userData = {
-      transactions: [],
-      goal: 0,
-      income: 0,
-      budgets: {}
-    };
+  <div class="footer">
+    <a href="transactions.html" title="Go to Transactions">
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
+  </div>
 
-    function loginUser() {
-      const username = document.getElementById('usernameInput').value.trim();
-      if (!username) return alert("Please enter a username.");
-      currentUser = username;
-      const stored = localStorage.getItem("user_" + username);
-      if (stored) userData = JSON.parse(stored);
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("appContainer").style.display = "block";
-      updateUI();
-    }
-
-    function saveUserData() {
-      localStorage.setItem("user_" + currentUser, JSON.stringify(userData));
-    }
-
-    function addTransaction() {
-      const amount = parseFloat(document.getElementById("amount").value);
-      const category = document.getElementById("category").value || "General";
-      const type = document.getElementById("type").value;
-      const recurring = document.getElementById("recurring").checked;
-      if (isNaN(amount) || amount <= 0) return alert("Enter a valid amount.");
-
-      const date = new Date();
-      const transaction = { amount, category, type, date: date.toISOString(), recurring };
-      userData.transactions.unshift(transaction);
-      saveUserData();
-      updateUI();
-    }
-
-    function setGoal() {
-      const goalAmount = parseFloat(document.getElementById("goal").value);
-      if (!isNaN(goalAmount) && goalAmount > 0) {
-        userData.goal = goalAmount;
-        saveUserData();
-        document.getElementById("goalStatus").textContent = `Goal set to $${goalAmount}`;
-      } else {
-        alert("Enter a valid goal amount.");
-      }
-    }
-
-    function setMonthlyIncome() {
-      const income = parseFloat(document.getElementById("userIncome").value);
-      if (isNaN(income) || income <= 0) return alert("Please enter a valid monthly income.");
-      userData.income = income;
-      saveUserData();
-      displayBudgetSuggestions(income);
-      updateUI();
-    }
-
-    function displayBudgetSuggestions(income) {
-      const suggestedBudgets = {
-        Needs: (income * 0.5).toFixed(2),
-        Wants: (income * 0.3).toFixed(2),
-        Savings: (income * 0.2).toFixed(2)
-      };
-      const div = document.getElementById("suggestedBudgets");
-      div.innerHTML = `<p>Suggested Budgets:</p>
-        ${Object.entries(suggestedBudgets).map(([cat, val]) =>
-          `<label>${cat}: <input type="number" id="custom_${cat}" value="${val}" /></label><br/>`
-        ).join('')}
-        <button onclick="saveCustomBudgets()">Save Custom Budgets</button>`;
-    }
-
-    function saveCustomBudgets() {
-      const categories = ["Needs", "Wants", "Savings"];
-      categories.forEach(cat => {
-        const val = parseFloat(document.getElementById(`custom_${cat}`).value);
-        if (!isNaN(val)) userData.budgets[cat] = val;
-      });
-      saveUserData();
-      alert("Custom budgets saved!");
-    }
-
-    function updateUI() {
-      const balanceEl = document.getElementById("balance");
-      const incomeEl = document.getElementById("monthlyIncome");
-      const expenseEl = document.getElementById("monthlyExpenses");
-      const goalStatusEl = document.getElementById("goalStatus");
-      const listEl = document.getElementById("transactionList");
-      const tipEl = document.getElementById("aiTip");
-      const monthFilterEl = document.getElementById("monthFilter");
-
-      let balance = 0;
-      let incomeTotal = 0;
-      let expenseTotal = 0;
-      const filter = monthFilterEl.value || "all";
-
-      const transactions = userData.transactions;
-
-      transactions.forEach(t => {
-        const d = new Date(t.date);
-        const tag = `${d.getFullYear()}-${d.getMonth()}`;
-        if (filter !== "all" && tag !== filter) return;
-        if (t.type === "income") {
-          incomeTotal += t.amount;
-          balance += t.amount;
-        } else {
-          expenseTotal += t.amount;
-          balance -= t.amount;
-        }
-      });
-
-      balanceEl.textContent = `Balance: $${balance.toFixed(2)}`;
-      incomeEl.textContent = `Monthly Income: $${incomeTotal.toFixed(2)}`;
-      expenseEl.textContent = `Monthly Expenses: $${expenseTotal.toFixed(2)}`;
-
-      listEl.innerHTML = "";
-      transactions.forEach(t => {
-        const d = new Date(t.date);
-        const tag = `${d.getFullYear()}-${d.getMonth()}`;
-        if (filter !== "all" && tag !== filter) return;
-        const row = document.createElement("div");
-        row.className = "transaction";
-        const date = d.toLocaleDateString();
-        const label = t.recurring ? '(Recurring)' : '';
-        row.innerHTML = `<span>${date} - ${t.category} ${label}</span><span class="${t.type}">${t.type === 'income' ? '+' : '-'}$${t.amount.toFixed(2)}</span>`;
-        listEl.appendChild(row);
-      });
-
-      if (userData.goal > 0) {
-        const remaining = userData.goal - balance;
-        goalStatusEl.textContent = remaining > 0 ? `You are $${remaining.toFixed(2)} away from your goal.` : `Goal reached! 🎉`;
-      }
-
-      if (userData.income > 0) {
-        document.getElementById("userIncome").value = userData.income;
-        displayBudgetSuggestions(userData.income);
-      }
-
-      tipEl.textContent = (expenseTotal > incomeTotal * 0.9)
-        ? "You're spending close to what you earn. Try cutting discretionary expenses."
-        : (incomeTotal > 0 && expenseTotal / incomeTotal < 0.5)
-        ? "Great job saving! Consider automating a portion of your income to savings."
-        : "Review your subscriptions and eliminate unused services to boost savings.";
-    }
-  </script>
 </body>
 </html>
+
