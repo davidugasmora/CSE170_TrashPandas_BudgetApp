@@ -32,6 +32,7 @@
       border: 1px solid #000;
       background: #fff;
       font-weight: bold;
+      cursor: pointer;
     }
     .toggle-buttons button.active {
       background: #000;
@@ -61,15 +62,22 @@
       border-radius: 20px;
       margin: 10px auto;
       width: 70%;
+      cursor: pointer;
     }
     .graph-placeholder {
       border: 1px solid #000;
-      height: 200px;
+      height: auto;
+      min-height: 200px;
       margin: 20px 0;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 10px;
+    }
+    .category-entry {
+      margin: 5px 0;
+      font-weight: bold;
     }
     .footer {
       background: #444;
@@ -89,24 +97,28 @@
   <div class="container">
     <div class="section-title">TRANSACTIONS</div>
     <div class="toggle-buttons">
-      <button class="active">income</button>
-      <button>expense</button>
+      <button id="incomeBtn" class="active">income</button>
+      <button id="expenseBtn">expense</button>
     </div>
-    <input type="number" placeholder="$ total amount" />
+    <input id="totalInput" type="number" placeholder="$ total amount" />
 
     <div class="section-title">AMOUNT REMAINING</div>
-    <h2><strong>${remaining}</strong></h2>
+    <h2><strong id="remainingDisplay">$0.00</strong></h2>
 
     <div class="row">
-      <select>
-        <option>category</option>
+      <select id="categorySelect">
+        <option value="">Category</option>
+        <option value="food">Food</option>
+        <option value="utilities">Utilities</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="misc">Misc</option>
       </select>
-      <input type="number" placeholder="$" />
+      <input id="categoryAmount" type="number" placeholder="$" />
     </div>
 
-    <div class="button">ADD MORE</div>
+    <div id="addMoreBtn" class="button">ADD MORE</div>
 
-    <div class="graph-placeholder">graph of category balances</div>
+    <div id="graph" class="graph-placeholder">Graph of Category Balances</div>
   </div>
 
   <div class="footer">
@@ -116,6 +128,88 @@
       </svg>
     </a>
   </div>
+
+  <script>
+    const incomeBtn = document.getElementById('incomeBtn');
+    const expenseBtn = document.getElementById('expenseBtn');
+    const totalInput = document.getElementById('totalInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const categoryAmount = document.getElementById('categoryAmount');
+    const addMoreBtn = document.getElementById('addMoreBtn');
+    const remainingDisplay = document.getElementById('remainingDisplay');
+    const graph = document.getElementById('graph');
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    let currentType = 'income';
+    const categoryBalances = {};
+
+    incomeBtn.onclick = () => {
+      currentType = 'income';
+      incomeBtn.classList.add('active');
+      expenseBtn.classList.remove('active');
+    };
+
+    expenseBtn.onclick = () => {
+      currentType = 'expense';
+      expenseBtn.classList.add('active');
+      incomeBtn.classList.remove('active');
+    };
+
+    totalInput.onchange = () => {
+      const value = parseFloat(totalInput.value) || 0;
+      if (currentType === 'income') {
+        totalIncome = value;
+      } else {
+        totalExpense = value;
+      }
+      updateRemaining();
+    };
+
+    addMoreBtn.onclick = () => {
+      const category = categorySelect.value;
+      const amount = parseFloat(categoryAmount.value);
+
+      if (!category || isNaN(amount)) {
+        alert('Please enter both a category and amount.');
+        return;
+      }
+
+      if (!categoryBalances[category]) {
+        categoryBalances[category] = 0;
+      }
+
+      if (currentType === 'income') {
+        totalIncome += amount;
+        categoryBalances[category] += amount;
+      } else {
+        totalExpense += amount;
+        categoryBalances[category] -= amount;
+      }
+
+      totalInput.value = '';
+      categorySelect.value = '';
+      categoryAmount.value = '';
+
+      updateRemaining();
+      updateGraph();
+    };
+
+    function updateRemaining() {
+      const remaining = totalIncome - totalExpense;
+      remainingDisplay.textContent = `$${remaining.toFixed(2)}`;
+    }
+
+    function updateGraph() {
+      graph.innerHTML = '';
+      for (const [category, amount] of Object.entries(categoryBalances)) {
+        const div = document.createElement('div');
+        div.className = 'category-entry';
+        div.textContent = `${category}: $${amount.toFixed(2)}`;
+        graph.appendChild(div);
+      }
+    }
+  </script>
 
 </body>
 </html>
