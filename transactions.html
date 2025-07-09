@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Transactions</title>
+  <title>Budget calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -21,22 +23,6 @@
     .section-title {
       font-weight: bold;
       margin: 20px 0 10px;
-    }
-    .toggle-buttons {
-      display: flex;
-      gap: 10px;
-    }
-    .toggle-buttons button {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #000;
-      background: #fff;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .toggle-buttons button.active {
-      background: #000;
-      color: #fff;
     }
     input, select {
       width: 100%;
@@ -66,18 +52,12 @@
     }
     .graph-placeholder {
       border: 1px solid #000;
-      height: auto;
-      min-height: 200px;
       margin: 20px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
       padding: 10px;
     }
-    .category-entry {
-      margin: 5px 0;
-      font-weight: bold;
+    canvas {
+      width: 100% !important;
+      height: auto !important;
     }
     .footer {
       background: #444;
@@ -95,11 +75,7 @@
 <body>
 
   <div class="container">
-    <div class="section-title">TRANSACTIONS</div>
-    <div class="toggle-buttons">
-      <button id="incomeBtn" class="active">income</button>
-      <button id="expenseBtn">expense</button>
-    </div>
+    <div class="section-title">BUDGET CALCULATOR</div>
     <input id="totalInput" type="number" placeholder="$ total amount" />
 
     <div class="section-title">AMOUNT REMAINING</div>
@@ -118,7 +94,11 @@
 
     <div id="addMoreBtn" class="button">ADD MORE</div>
 
-    <div id="graph" class="graph-placeholder">Graph of Category Balances</div>
+    <div class="graph-placeholder">
+      <canvas id="barChart"></canvas>
+    </div>
+
+    <div id="saveBudgetBtn" class="button">SAVE BUDGET</div>
   </div>
 
   <div class="footer">
@@ -130,39 +110,66 @@
   </div>
 
   <script>
-    const incomeBtn = document.getElementById('incomeBtn');
-    const expenseBtn = document.getElementById('expenseBtn');
     const totalInput = document.getElementById('totalInput');
     const categorySelect = document.getElementById('categorySelect');
     const categoryAmount = document.getElementById('categoryAmount');
     const addMoreBtn = document.getElementById('addMoreBtn');
+    const saveBudgetBtn = document.getElementById('saveBudgetBtn');
     const remainingDisplay = document.getElementById('remainingDisplay');
-    const graph = document.getElementById('graph');
 
     let totalIncome = 0;
     let totalExpense = 0;
-    let currentType = 'income';
     const categoryBalances = {};
-
-    incomeBtn.onclick = () => {
-      currentType = 'income';
-      incomeBtn.classList.add('active');
-      expenseBtn.classList.remove('active');
+    const categoryColors = {
+      food: '#FF6384',
+      utilities: '#36A2EB',
+      entertainment: '#FFCE56',
+      misc: '#4BC0C0'
     };
 
-    expenseBtn.onclick = () => {
-      currentType = 'expense';
-      expenseBtn.classList.add('active');
-      incomeBtn.classList.remove('active');
-    };
+    const ctx = document.getElementById('barChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Category Expenses',
+          data: [],
+          backgroundColor: [],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => `$${context.parsed.x.toFixed(2)}`
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            color: '#000',
+            font: { weight: 'bold' },
+            formatter: (value) => `$${value.toFixed(2)}`
+          }
+        },
+        responsive: true,
+        scales: {
+          x: {
+            beginAtZero: true
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
 
     totalInput.onchange = () => {
       const value = parseFloat(totalInput.value) || 0;
-      if (currentType === 'income') {
-        totalIncome = value;
-      } else {
-        totalExpense = value;
-      }
+      totalIncome += value;
+      totalInput.value = '';
       updateRemaining();
     };
 
@@ -175,24 +182,31 @@
         return;
       }
 
-      if (!categoryBalances[category]) {
-        categoryBalances[category] = 0;
+      const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+
+      if (!categoryBalances[capitalizedCategory]) {
+        categoryBalances[capitalizedCategory] = 0;
       }
 
-      if (currentType === 'income') {
-        totalIncome += amount;
-        categoryBalances[category] += amount;
-      } else {
-        totalExpense += amount;
-        categoryBalances[category] -= amount;
-      }
+      totalExpense += amount;
+      categoryBalances[capitalizedCategory] -= amount;
 
-      totalInput.value = '';
       categorySelect.value = '';
       categoryAmount.value = '';
 
       updateRemaining();
       updateGraph();
+    };
+
+    saveBudgetBtn.onclick = () => {
+      const budgetData = {
+        totalIncome,
+        totalExpense,
+        remaining: totalIncome - totalExpense,
+        categoryBalances
+      };
+      localStorage.setItem('savedBudget', JSON.stringify(budgetData));
+      alert('Budget saved! You can access it on another page.');
     };
 
     function updateRemaining() {
@@ -201,15 +215,17 @@
     }
 
     function updateGraph() {
-      graph.innerHTML = '';
-      for (const [category, amount] of Object.entries(categoryBalances)) {
-        const div = document.createElement('div');
-        div.className = 'category-entry';
-        div.textContent = `${category}: $${amount.toFixed(2)}`;
-        graph.appendChild(div);
-      }
+      const labels = Object.keys(categoryBalances);
+      const data = labels.map(l => Math.abs(categoryBalances[l]));
+      const colors = labels.map(l => categoryColors[l.toLowerCase()] || '#888');
+
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.data.datasets[0].backgroundColor = colors;
+      chart.update();
     }
   </script>
 
 </body>
 </html>
+
