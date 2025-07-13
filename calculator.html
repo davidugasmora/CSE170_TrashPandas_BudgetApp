@@ -1,0 +1,267 @@
+<!-- transactions.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budget calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+    .container {
+      padding: 20px;
+      max-width: 414px;
+      margin: auto;
+    }
+    .section-title {
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-weight: bold;
+      border: 1px solid #000;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row > * {
+      flex: 1;
+    }
+    .button {
+      padding: 10px;
+      background: #aaa;
+      color: #000;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 20px;
+      margin: 10px auto;
+      width: 70%;
+      cursor: pointer;
+    }
+    .graph-placeholder {
+      border: 1px solid #000;
+      margin: 20px 0;
+      padding: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+    /* updated footer styles */
+    .footer {
+      background: #444;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a {
+      flex: 1;
+      text-align: center;
+    }
+    .footer a svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="section-title">BUDGET CALCULATOR</div>
+    <input id="totalInput" type="number" placeholder="Please enter income" />
+
+    <div class="section-title">AMOUNT REMAINING</div>
+    <h2><strong id="remainingDisplay">$0.00</strong></h2>
+
+    <div class="row">
+      <select id="categorySelect">
+        <option value="">Category</option>
+        <option value="food">Food</option>
+        <option value="utilities">Utilities</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="misc">Misc</option>
+        <option value="rent">Rent</option>
+        <option value="bills">Bills</option>
+        <option value="gas">Gas</option>
+        <option value="school">School</option>
+        <option value="tithing">Tithing</option>
+      </select>
+      <input id="categoryAmount" type="number" placeholder="$" />
+    </div>
+
+    <div id="addMoreBtn" class="button">ADD MORE</div>
+
+    <div class="graph-placeholder">
+      <canvas id="barChart"></canvas>
+    </div>
+
+    <div id="saveBudgetBtn" class="button">SAVE BUDGET</div>
+  </div>
+
+  <div class="footer">
+    <!-- Logs button -->
+    <a href="transactions.html" title="Go to Logs">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
+      </svg>
+    </a>
+
+    <!-- Home button -->
+    <a href="index.html" title="Go to Dashboard">
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
+
+    <!-- Calculator button -->
+    <a href="calculator.html" title="Go to Calculator">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    const totalInput = document.getElementById('totalInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const categoryAmount = document.getElementById('categoryAmount');
+    const addMoreBtn = document.getElementById('addMoreBtn');
+    const saveBudgetBtn = document.getElementById('saveBudgetBtn');
+    const remainingDisplay = document.getElementById('remainingDisplay');
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const categoryBalances = {};
+    const categoryColors = {
+      food: '#FF6384',
+      utilities: '#36A2EB',
+      entertainment: '#FFCE56',
+      misc: '#4BC0C0',
+      rent: '#8A2BE2',
+      bills: '#FF7F50',
+      gas: '#228B22',
+      school: '#DA70D6',
+      tithing: '#FFD700'
+    };
+
+    const ctx = document.getElementById('barChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Category Expenses',
+          data: [],
+          backgroundColor: [],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => `$${context.parsed.x.toFixed(2)}`
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            color: '#000',
+            font: { weight: 'bold' },
+            formatter: (value) => `$${value.toFixed(2)}`
+          }
+        },
+        responsive: true,
+        scales: {
+          x: {
+            beginAtZero: true,
+            suggestedMax: 100
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+    totalInput.onchange = () => {
+      const value = parseFloat(totalInput.value) || 0;
+      totalIncome += value;
+      totalInput.value = '';
+      updateRemaining();
+    };
+
+    addMoreBtn.onclick = () => {
+      const category = categorySelect.value;
+      const amount = parseFloat(categoryAmount.value);
+
+      if (!category || isNaN(amount)) {
+        alert('Please enter both a category and amount.');
+        return;
+      }
+
+      const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+
+      if (!categoryBalances[capitalizedCategory]) {
+        categoryBalances[capitalizedCategory] = 0;
+      }
+
+      totalExpense += amount;
+      categoryBalances[capitalizedCategory] -= amount;
+
+      categorySelect.value = '';
+      categoryAmount.value = '';
+
+      updateRemaining();
+      updateGraph();
+    };
+
+    saveBudgetBtn.onclick = () => {
+      const budgetData = {
+        totalIncome,
+        totalExpense,
+        remaining: totalIncome - totalExpense,
+        categoryBalances
+      };
+      localStorage.setItem('savedBudget', JSON.stringify(budgetData));
+      alert('Budget saved! You can access it on another page.');
+    };
+
+    function updateRemaining() {
+      const remaining = totalIncome - totalExpense;
+      remainingDisplay.textContent = `$${remaining.toFixed(2)}`;
+    }
+
+    function updateGraph() {
+      const labels = Object.keys(categoryBalances);
+      const data = labels.map(l => Math.abs(categoryBalances[l]));
+      const colors = labels.map(l => categoryColors[l.toLowerCase()] || '#888');
+      const maxValue = Math.max(...data, 0) + 50;
+
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.data.datasets[0].backgroundColor = colors;
+      chart.options.scales.x.suggestedMax = maxValue;
+      chart.update();
+    }
+  </script>
+
+</body>
+</html>
+
+
+
