@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard</title>
+
+  <!-- Chart.js and plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -26,46 +31,14 @@
     }
 
     .graph-placeholder {
-      padding-left: 5px;
-      min-height: 200px;
+      border: 1px solid #000;
       margin: 20px 0;
+      padding: 10px;
     }
 
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin: 10px 0;
-    }
-
-    .bar-label {
-      width: 100px;
-      font-weight: bold;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    .bar-container {
-      flex: 1;
-      height: 28px;
-      background-color: #eee;
-      margin-left: 10px;
-      position: relative;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      font-weight: bold;
-      font-size: 13px;
-      color: #fff;
-      padding-right: 10px;
-      border-radius: 4px;
-      white-space: nowrap;
-      transition: width 0.3s ease;
+    canvas {
+      width: 100% !important;
+      height: auto !important;
     }
 
     .overview-boxes {
@@ -95,7 +68,14 @@
       background: #444;
       padding: 15px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .footer a {
+      flex: 1;
+      text-align: center;
     }
 
     .footer a svg {
@@ -112,8 +92,8 @@
     <h2><strong id="balanceDisplay">$0.00</strong></h2>
 
     <div class="section-title">CATEGORY BALANCES</div>
-    <div class="graph-placeholder" id="categoryGraph">
-      Loading category balances...
+    <div class="graph-placeholder">
+      <canvas id="barChart"></canvas>
     </div>
 
     <div class="section-title">MONTHLY OVERVIEW</div>
@@ -135,14 +115,65 @@
   </div>
 
   <div class="footer">
-    <a href="transactions.html" title="Go to Transactions">
+    <a href="transactions.html" title="Go to Logs">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
+      </svg>
+    </a>
+    <a href="index.html" title="Go to Dashboard">
       <svg viewBox="0 0 24 24">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
+    <a href="calculator.html" title="Go to Calculator">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
       </svg>
     </a>
   </div>
 
   <script>
+    const ctx = document.getElementById('barChart').getContext('2d');
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Category Expenses',
+          data: [],
+          backgroundColor: [],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => `$${context.parsed.x.toFixed(2)}`
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            color: '#000',
+            font: { weight: 'bold' },
+            formatter: value => `$${value.toFixed(2)}`
+          }
+        },
+        responsive: true,
+        scales: {
+          x: {
+            beginAtZero: true,
+            suggestedMax: 100
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
     function loadBudgetData() {
       const income = parseFloat(localStorage.getItem('totalIncome')) || 0;
       const expense = parseFloat(localStorage.getItem('totalExpense')) || 0;
@@ -152,47 +183,18 @@
       document.getElementById('incomeBox').textContent = `$${income.toFixed(2)}`;
       document.getElementById('expenseBox').textContent = `$${expense.toFixed(2)}`;
 
-      const graph = document.getElementById('categoryGraph');
-      graph.innerHTML = '';
-
-      const values = Object.values(categoryData).map(Math.abs);
-      const maxValue = Math.max(...values, 1);
-
-      const colors = [
+      const labels = Object.keys(categoryData);
+      const data = labels.map(label => Math.abs(categoryData[label]));
+      const colors = labels.map((_, i) => [
         '#9C27B0', '#03A9F4', '#FF9800', '#4CAF50', '#E91E63',
         '#2196F3', '#00BCD4', '#8BC34A', '#FFC107', '#673AB7'
-      ];
+      ][i % 10]);
 
-      let i = 0;
-
-      for (const [category, amount] of Object.entries(categoryData)) {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-
-        const label = document.createElement('div');
-        label.className = 'bar-label';
-        label.textContent = category;
-
-        const container = document.createElement('div');
-        container.className = 'bar-container';
-
-        const fill = document.createElement('div');
-        fill.className = 'bar-fill';
-        fill.style.width = `${(Math.abs(amount) / maxValue) * 100}%`;
-        fill.style.backgroundColor = colors[i % colors.length];
-        fill.textContent = `$${Math.abs(amount).toFixed(2)}`;
-
-        container.appendChild(fill);
-        row.appendChild(label);
-        row.appendChild(container);
-
-        graph.appendChild(row);
-        i++;
-      }
-
-      if (Object.keys(categoryData).length === 0) {
-        graph.textContent = 'No category data yet.';
-      }
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.data.datasets[0].backgroundColor = colors;
+      chart.options.scales.x.suggestedMax = Math.max(...data, 1) + 50;
+      chart.update();
     }
 
     window.onload = loadBudgetData;
