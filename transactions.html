@@ -1,11 +1,191 @@
+<!-- transaction-tracker.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+    .container {
+      padding: 20px;
+      max-width: 414px;
+      margin: auto;
+    }
+    .section-title {
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-weight: bold;
+      border: 1px solid #000;
+      box-sizing: border-box;
+    }
+    .button {
+      padding: 10px;
+      background: #aaa;
+      color: #000;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 20px;
+      margin: 10px auto;
+      width: 70%;
+      cursor: pointer;
+    }
+    .graph-placeholder {
+      border: 1px solid #000;
+      margin: 20px 0;
+      padding: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+    }
+    .footer {
+      background: #444;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+    .footer a svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+  </style>
 </head>
 <body>
-    
+
+  <div class="container">
+    <div class="section-title">TRANSACTION TRACKER</div>
+
+    <input id="dateInput" type="date" />
+    <input id="descInput" type="text" placeholder="Description" />
+    <select id="catInput">
+      <option value="">Category</option>
+      <option value="Food">Food</option>
+      <option value="Utilities">Utilities</option>
+      <option value="Entertainment">Entertainment</option>
+      <option value="Misc">Misc</option>
+      <option value="Rent">Rent</option>
+      <option value="Bills">Bills</option>
+      <option value="Gas">Gas</option>
+      <option value="School">School</option>
+      <option value="Tithing">Tithing</option>
+    </select>
+    <input id="amtInput" type="number" placeholder="Amount" />
+
+    <div id="addTxnBtn" class="button">ADD TRANSACTION</div>
+
+    <div class="graph-placeholder">
+      <table id="transactionsTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="transactions.html" title="Go to Logs">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
+      </svg>
+    </a>
+    <a href="index.html" title="Go to Dashboard">
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
+    <a href="calculator.html" title="Go to Calculator">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    const dateInput = document.getElementById('dateInput');
+    const descInput = document.getElementById('descInput');
+    const catInput  = document.getElementById('catInput');
+    const amtInput  = document.getElementById('amtInput');
+    const addTxnBtn = document.getElementById('addTxnBtn');
+    const tbody     = document.querySelector('#transactionsTable tbody');
+    let transactions = [];
+
+    addTxnBtn.addEventListener('click', () => {
+      const date = dateInput.value;
+      const desc = descInput.value.trim();
+      const cat  = catInput.value;
+      const amt  = parseFloat(amtInput.value);
+
+      if (!date || !desc || !cat || isNaN(amt)) {
+        alert('Please fill out all fields.');
+        return;
+      }
+
+      const txn = { date, desc, cat, amt };
+      transactions.push(txn);
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${date}</td>
+        <td>${desc}</td>
+        <td>${cat}</td>
+        <td>$${amt.toFixed(2)}</td>
+      `;
+      tbody.appendChild(row);
+
+      // clear inputs
+      dateInput.value = '';
+      descInput.value = '';
+      catInput.value = '';
+      amtInput.value = '';
+
+      // optionally save to localStorage
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+    });
+
+    // load saved transactions
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = JSON.parse(localStorage.getItem('transactions') || '[]');
+      saved.forEach(txn => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${txn.date}</td>
+          <td>${txn.desc}</td>
+          <td>${txn.cat}</td>
+          <td>$${txn.amt.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+        transactions.push(txn);
+      });
+    });
+  </script>
 </body>
 </html>
