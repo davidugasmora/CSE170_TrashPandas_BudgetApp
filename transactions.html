@@ -73,18 +73,29 @@
       background: var(--pal-medium);
       color: var(--pal-lightest);
     }
-    .footer {
-      background: var(--pal-darker);
-      padding: 15px;
-      display: flex; justify-content: center; gap: 30px;
-      position: fixed; bottom: 0;
-      width: 100%; max-width: 414px;
-      left: 50%; transform: translateX(-50%);
-    }
-    .footer a svg {
-      width: 30px; height: 30px;
-      fill: var(--pal-lightest);
-    }
+
+  .footer {
+    background: var(--pal-darker);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 414px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .footer a {
+    flex: 1;
+    text-align: center;
+  }
+  .footer a svg {
+    width: 30px;
+    height: 30px;
+    fill: var(--pal-lightest);
+  }
   </style>
 </head>
 <body>
