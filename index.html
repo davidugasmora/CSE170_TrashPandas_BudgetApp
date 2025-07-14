@@ -68,26 +68,32 @@
       padding: 10px; margin-top: 10px;
       border-radius: 8px;
     }
+    .transaction-list table {
+      width: 100%; border-collapse: collapse; margin-top: 5px;
+    }
+    .transaction-list th,
+    .transaction-list td {
+      border: 1px solid var(--pal-dark);
+      padding: 6px; text-align: left; font-size: 0.9em;
+    }
+    .transaction-list th {
+      background: var(--pal-medium);
+      color: var(--pal-lightest);
+    }
     .footer {
       background: var(--pal-darker);
       padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      max-width: 414px;
-      left: 50%;
-      transform: translateX(-50%);
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 30px;
+      position: fixed; bottom: 0;
+      width: 100%; max-width: 414px;
+      left: 50%; transform: translateX(-50%);
     }
     .footer a {
-      flex: 1;
-      text-align: center;
+      flex: 1; text-align: center;
     }
     .footer a svg {
-      width: 30px;
-      height: 30px;
+      width: 30px; height: 30px;
       fill: var(--pal-lightest);
     }
   </style>
@@ -115,69 +121,79 @@
       </div>
     </div>
 
-    <div class="section-title">MONTHLY TRANSACTIONS</div>
-    <div class="transaction-list" id="transactionList">
-      No detailed transaction tracking yet.
+    <div class="section-title">RECENT TRANSACTIONS</div>
+    <div class="transaction-list">
+      <table id="recentTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
   <div class="footer">
     <a href="transactions.html" title="Go to Logs">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
     </a>
     <a href="index.html" title="Go to Dashboard">
-      <svg viewBox="0 0 24 24">
-        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
     </a>
     <a href="calculator.html" title="Go to Calculator">
-      <svg viewBox="0 0 24 24">
-        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>
     </a>
   </div>
 
   <script>
     const ctx = document.getElementById('barChart').getContext('2d');
     const palette = ['#588157','#3A5A40','#344E41','#A3B18A','#DAD7CD'];
-
     const chart = new Chart(ctx, {
       type: 'bar',
-      data: {
-        labels: [],
-        datasets: [{ label: 'Category Expenses', data: [], backgroundColor: [], borderWidth: 0 }]
-      },
+      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] },
       options: {
         indexAxis: 'y',
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.x.toFixed(2)}` }},
+          tooltip: { callbacks: { label: c => `$${c.parsed.x.toFixed(2)}` }},
           datalabels: {
             anchor: 'end', align: 'end',
-            color: 'var(--text-color)',
-            font: { weight: 'bold' },
-            formatter: v => `$${v.toFixed(2)}`
+            color: 'var(--text-color)', font:{ weight:'bold' },
+            formatter: v=>`$${v.toFixed(2)}`
           }
         },
         responsive: true,
-        scales: { x: { beginAtZero: true, suggestedMax: 100 } }
+        scales: { x:{ beginAtZero:true, suggestedMax:100 } }
       },
       plugins: [ChartDataLabels]
     });
 
-    function loadBudgetData() {
-      const income  = +localStorage.getItem('totalIncome')  || 0;
-      const expense = +localStorage.getItem('totalExpense') || 0;
-      const catData = JSON.parse(localStorage.getItem('categoryBalances') || '{}');
+    function loadBudgetData(){
+      // try to load the savedBudget first
+      const saved = JSON.parse(localStorage.getItem('savedBudget') || 'null');
+      let income, expense, cats;
+      if (saved) {
+        income  = saved.totalIncome;
+        expense = saved.totalExpense;
+        cats     = saved.categoryBalances;
+      } else {
+        income  = +localStorage.getItem('totalIncome')  || 0;
+        expense = +localStorage.getItem('totalExpense') || 0;
+        cats     = JSON.parse(localStorage.getItem('categoryBalances') || '{}');
+      }
 
+      // update balance boxes
       document.getElementById('balanceDisplay').textContent = `$${(income - expense).toFixed(2)}`;
       document.getElementById('incomeBox').textContent    = `$${income.toFixed(2)}`;
       document.getElementById('expenseBox').textContent   = `$${expense.toFixed(2)}`;
 
-      const labels = Object.keys(catData);
-      const data   = labels.map(l => Math.abs(catData[l]));
+      // populate chart
+      const labels = Object.keys(cats);
+      const data   = labels.map(l => Math.abs(cats[l]));
       const colors = labels.map((_,i) => palette[i % palette.length]);
 
       chart.data.labels             = labels;
@@ -187,7 +203,28 @@
       chart.update();
     }
 
-    window.onload = loadBudgetData;
+    function loadRecentTransactions(){
+      const txns = JSON.parse(localStorage.getItem('transactions') || '[]');
+      txns.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      const recent = txns.slice(0,5);
+      const tbody  = document.querySelector('#recentTable tbody');
+      recent.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.date}</td>
+          <td>${t.desc}</td>
+          <td>${t.cat}</td>
+          <td>$${t.amt.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.onload = () => {
+      loadBudgetData();
+      loadRecentTransactions();
+    };
   </script>
 </body>
 </html>
+
