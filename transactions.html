@@ -1,4 +1,3 @@
-<!-- transaction-tracker.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,35 +6,48 @@
   <title>Transaction Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
   <style>
+    :root {
+      --pal-lightest: #DAD7CD;
+      --pal-light:     #A3B18A;
+      --pal-medium:    #588157;
+      --pal-dark:      #3A5A40;
+      --pal-darker:    #344E41;
+      --text-color:    var(--pal-darker);
+    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #fff;
-      color: #000;
+      margin: 0; padding: 0;
+      background: var(--pal-lightest);
+      color: var(--text-color);
     }
     .container {
       padding: 20px;
       max-width: 414px;
       margin: auto;
+      padding-bottom: 100px;
     }
     .section-title {
       font-weight: bold;
       margin: 20px 0 10px;
+      color: var(--pal-darker);
     }
     input, select {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       font-weight: bold;
-      border: 1px solid #000;
-      box-sizing: border-box;
+      border: 1px solid var(--pal-dark);
+      border-radius: 6px;
+      background: var(--pal-lightest);
+      color: var(--text-color);
     }
     .button {
       padding: 10px;
-      background: #aaa;
-      color: #000;
+      background: var(--pal-medium);
+      color: var(--pal-lightest);
       font-weight: bold;
       text-align: center;
       border-radius: 20px;
@@ -44,32 +56,34 @@
       cursor: pointer;
     }
     .graph-placeholder {
-      border: 1px solid #000;
+      border: 1px solid var(--pal-dark);
       margin: 20px 0;
       padding: 10px;
+      background: var(--pal-lightest);
+      border-radius: 8px;
     }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+      width: 100%; border-collapse: collapse; margin-top: 10px;
     }
     th, td {
-      border: 1px solid #000;
-      padding: 8px;
-      text-align: left;
+      border: 1px solid var(--pal-dark);
+      padding: 8px; text-align: left;
+    }
+    th {
+      background: var(--pal-medium);
+      color: var(--pal-lightest);
     }
     .footer {
-      background: #444;
+      background: var(--pal-darker);
       padding: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 30px;
+      display: flex; justify-content: center; gap: 30px;
+      position: fixed; bottom: 0;
+      width: 100%; max-width: 414px;
+      left: 50%; transform: translateX(-50%);
     }
     .footer a svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
+      width: 30px; height: 30px;
+      fill: var(--pal-lightest);
     }
   </style>
 </head>
@@ -82,15 +96,9 @@
     <input id="descInput" type="text" placeholder="Description" />
     <select id="catInput">
       <option value="">Category</option>
-      <option value="Food">Food</option>
-      <option value="Utilities">Utilities</option>
-      <option value="Entertainment">Entertainment</option>
-      <option value="Misc">Misc</option>
-      <option value="Rent">Rent</option>
-      <option value="Bills">Bills</option>
-      <option value="Gas">Gas</option>
-      <option value="School">School</option>
-      <option value="Tithing">Tithing</option>
+      <option>Food</option><option>Utilities</option><option>Entertainment</option>
+      <option>Misc</option><option>Rent</option><option>Bills</option>
+      <option>Gas</option><option>School</option><option>Tithing</option>
     </select>
     <input id="amtInput" type="number" placeholder="Amount" />
 
@@ -99,12 +107,7 @@
     <div class="graph-placeholder">
       <table id="transactionsTable">
         <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-          </tr>
+          <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -145,8 +148,7 @@
       const amt  = parseFloat(amtInput.value);
 
       if (!date || !desc || !cat || isNaN(amt)) {
-        alert('Please fill out all fields.');
-        return;
+        return alert('Please fill out all fields.');
       }
 
       const txn = { date, desc, cat, amt };
@@ -161,17 +163,14 @@
       `;
       tbody.appendChild(row);
 
-      // clear inputs
       dateInput.value = '';
       descInput.value = '';
       catInput.value = '';
       amtInput.value = '';
 
-      // optionally save to localStorage
       localStorage.setItem('transactions', JSON.stringify(transactions));
     });
 
-    // load saved transactions
     window.addEventListener('DOMContentLoaded', () => {
       const saved = JSON.parse(localStorage.getItem('transactions') || '[]');
       saved.forEach(txn => {

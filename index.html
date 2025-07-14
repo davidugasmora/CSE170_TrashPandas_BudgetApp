@@ -10,78 +10,79 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
   <style>
+    :root {
+      --pal-lightest: #DAD7CD;
+      --pal-light:     #A3B18A;
+      --pal-medium:    #588157;
+      --pal-dark:      #3A5A40;
+      --pal-darker:    #344E41;
+      --text-color:    var(--pal-darker);
+    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #fff;
-      color: #000;
+      margin: 0; padding: 0;
+      background: var(--pal-lightest);
+      color: var(--text-color);
     }
     .container {
       padding: 20px;
       max-width: 414px;
       margin: auto;
+      padding-bottom: 100px; /* room for footer */
     }
     .section-title {
       font-weight: bold;
       margin: 20px 0 10px;
+      color: var(--pal-darker);
     }
     h2 {
       margin-bottom: 10px;
+      color: var(--pal-darker);
     }
-
     .graph-placeholder {
-      border: 1px solid #000;
+      border: 1px solid var(--pal-dark);
       margin: 20px 0;
       padding: 10px;
+      background: var(--pal-lightest);
+      border-radius: 8px;
     }
-
     canvas {
       width: 100% !important;
       height: auto !important;
     }
-
     .overview-boxes {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      display: flex; gap: 10px; margin-top: 10px;
     }
-
     .overview-boxes .box {
-      border: 1px solid #000;
-      flex: 1;
-      height: 60px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      background: var(--pal-medium);
+      flex: 1; height: 60px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--pal-lightest);
       font-weight: bold;
+      border-radius: 8px;
     }
-
     .transaction-list {
-      background: #eee;
-      padding: 10px;
-      margin-top: 10px;
+      background: var(--pal-light);
+      padding: 10px; margin-top: 10px;
+      border-radius: 8px;
     }
-
     .footer {
-      background: #444;
+      background: var(--pal-darker);
       padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 30px;
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 30px;
+      position: fixed; bottom: 0;
+      width: 100%; max-width: 414px;
+      left: 50%; transform: translateX(-50%);
     }
-
     .footer a {
-      flex: 1;
-      text-align: center;
+      flex: 1; text-align: center;
     }
-
     .footer a svg {
-      width: 30px;
-      height: 30px;
-      fill: white;
+      width: 30px; height: 30px;
+      fill: var(--pal-lightest);
     }
   </style>
 </head>
@@ -134,66 +135,49 @@
 
   <script>
     const ctx = document.getElementById('barChart').getContext('2d');
+    const palette = ['#588157','#3A5A40','#344E41','#A3B18A','#DAD7CD'];
 
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: [],
-        datasets: [{
-          label: 'Category Expenses',
-          data: [],
-          backgroundColor: [],
-          borderWidth: 0
-        }]
+        datasets: [{ label: 'Category Expenses', data: [], backgroundColor: [], borderWidth: 0 }]
       },
       options: {
         indexAxis: 'y',
         plugins: {
           legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: context => `$${context.parsed.x.toFixed(2)}`
-            }
-          },
+          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.x.toFixed(2)}` }},
           datalabels: {
-            anchor: 'end',
-            align: 'end',
-            color: '#000',
+            anchor: 'end', align: 'end',
+            color: 'var(--text-color)',
             font: { weight: 'bold' },
-            formatter: value => `$${value.toFixed(2)}`
+            formatter: v => `$${v.toFixed(2)}`
           }
         },
         responsive: true,
-        scales: {
-          x: {
-            beginAtZero: true,
-            suggestedMax: 100
-          }
-        }
+        scales: { x: { beginAtZero: true, suggestedMax: 100 } }
       },
       plugins: [ChartDataLabels]
     });
 
     function loadBudgetData() {
-      const income = parseFloat(localStorage.getItem('totalIncome')) || 0;
-      const expense = parseFloat(localStorage.getItem('totalExpense')) || 0;
-      const categoryData = JSON.parse(localStorage.getItem('categoryBalances') || '{}');
+      const income  = +localStorage.getItem('totalIncome')  || 0;
+      const expense = +localStorage.getItem('totalExpense') || 0;
+      const catData = JSON.parse(localStorage.getItem('categoryBalances') || '{}');
 
       document.getElementById('balanceDisplay').textContent = `$${(income - expense).toFixed(2)}`;
-      document.getElementById('incomeBox').textContent = `$${income.toFixed(2)}`;
-      document.getElementById('expenseBox').textContent = `$${expense.toFixed(2)}`;
+      document.getElementById('incomeBox').textContent    = `$${income.toFixed(2)}`;
+      document.getElementById('expenseBox').textContent   = `$${expense.toFixed(2)}`;
 
-      const labels = Object.keys(categoryData);
-      const data = labels.map(label => Math.abs(categoryData[label]));
-      const colors = labels.map((_, i) => [
-        '#9C27B0', '#03A9F4', '#FF9800', '#4CAF50', '#E91E63',
-        '#2196F3', '#00BCD4', '#8BC34A', '#FFC107', '#673AB7'
-      ][i % 10]);
+      const labels = Object.keys(catData);
+      const data   = labels.map(l => Math.abs(catData[l]));
+      const colors = labels.map((_,i) => palette[i % palette.length]);
 
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = data;
+      chart.data.labels             = labels;
+      chart.data.datasets[0].data   = data;
       chart.data.datasets[0].backgroundColor = colors;
-      chart.options.scales.x.suggestedMax = Math.max(...data, 1) + 50;
+      chart.options.scales.x.suggestedMax = Math.max(...data,1) + 50;
       chart.update();
     }
 
