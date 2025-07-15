@@ -10,11 +10,11 @@
   <style>
     :root {
       --pal-lightest: #DAD7CD;
-      --pal-light:     #A3B18A;
-      --pal-medium:    #588157;
-      --pal-dark:      #3A5A40;
-      --pal-darker:    #344E41;
-      --text-color:    var(--pal-darker);
+      --pal-light:    #A3B18A;
+      --pal-medium:   #588157;
+      --pal-dark:     #3A5A40;
+      --pal-darker:   #344E41;
+      --text-color:   var(--pal-darker);
     }
     * { box-sizing: border-box; }
     body {
@@ -27,14 +27,13 @@
       padding: 20px;
       max-width: 414px;
       margin: auto;
-      padding-bottom: 100px; /* for footer */
+      padding-bottom: 100px;
     }
     .section-title {
       font-weight: bold;
       margin: 20px 0 10px;
-      color: var(--pal-darker);
     }
-    input, select {
+    input, select, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -43,6 +42,23 @@
       border-radius: 6px;
       background: var(--pal-lightest);
       color: var(--text-color);
+      cursor: pointer;
+    }
+    .type-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .type-buttons button {
+      flex: 1;
+      border: none;
+      background: var(--pal-light);
+      color: var(--text-color);
+      border-radius: 20px;
+    }
+    .type-buttons button.active {
+      background: var(--pal-medium);
+      color: var(--pal-lightest);
     }
     .button {
       padding: 10px;
@@ -54,6 +70,7 @@
       margin: 10px auto;
       width: 70%;
       cursor: pointer;
+      border: none;
     }
     .transaction-list {
       background: var(--pal-light);
@@ -66,8 +83,7 @@
       border-collapse: collapse;
       margin-top: 5px;
     }
-    .transaction-list th,
-    .transaction-list td {
+    .transaction-list th, .transaction-list td {
       border: 1px solid var(--pal-dark);
       padding: 6px;
       text-align: left;
@@ -91,8 +107,7 @@
       transform: translateX(-50%);
     }
     .footer a svg {
-      width: 30px;
-      height: 30px;
+      width: 30px; height: 30px;
       fill: var(--pal-lightest);
     }
   </style>
@@ -105,22 +120,26 @@
     <input id="dateInput" type="date" />
     <input id="descInput" type="text" placeholder="Description" />
 
-    <!-- NEW: Type selector -->
-    <select id="typeInput">
-      <option value="">Type</option>
-      <option value="Expense">Expense</option>
-      <option value="Income">Income</option>
-    </select>
-
     <select id="catInput">
       <option value="">Category</option>
-      <option>Food</option><option>Utilities</option><option>Entertainment</option>
-      <option>Misc</option><option>Rent</option><option>Bills</option>
-      <option>Gas</option><option>School</option><option>Tithing</option>
-      <!-- you can extend with income categories if desired -->
+      <option>Food</option>
+      <option>Utilities</option>
+      <option>Entertainment</option>
+      <option>Misc</option>
+      <option>Rent</option>
+      <option>Bills</option>
+      <option>Gas</option>
+      <option>School</option>
+      <option>Tithing</option>
     </select>
 
     <input id="amtInput" type="number" placeholder="Amount" />
+
+    <!-- Moved here: Type selector buttons -->
+    <div class="type-buttons">
+      <button id="incomeBtn" class="active">Income</button>
+      <button id="expenseBtn">Expense</button>
+    </div>
 
     <div id="addTxnBtn" class="button">ADD TRANSACTION</div>
 
@@ -130,7 +149,7 @@
           <tr>
             <th>Date</th>
             <th>Description</th>
-            <th>Type</th>        <!-- NEW column -->
+            <th>Type</th>
             <th>Category</th>
             <th>Amount</th>
           </tr>
@@ -142,35 +161,55 @@
 
   <div class="footer">
     <a href="transactions.html" title="Go to Logs">
-      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
+      </svg>
     </a>
     <a href="index.html" title="Go to Dashboard">
-      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
     </a>
     <a href="calculator.html" title="Go to Calculator">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+      </svg>
     </a>
   </div>
 
   <script>
-    const dateInput = document.getElementById('dateInput');
-    const descInput = document.getElementById('descInput');
-    const typeInput = document.getElementById('typeInput');   // NEW
-    const catInput  = document.getElementById('catInput');
-    const amtInput  = document.getElementById('amtInput');
-    const addTxnBtn = document.getElementById('addTxnBtn');
-    const tbody     = document.querySelector('#transactionsTable tbody');
+    const dateInput  = document.getElementById('dateInput');
+    const descInput  = document.getElementById('descInput');
+    const incomeBtn  = document.getElementById('incomeBtn');
+    const expenseBtn = document.getElementById('expenseBtn');
+    const catInput   = document.getElementById('catInput');
+    const amtInput   = document.getElementById('amtInput');
+    const addTxnBtn  = document.getElementById('addTxnBtn');
+    const tbody      = document.querySelector('#transactionsTable tbody');
     let transactions = [];
+    let selectedType = 'Income';
+
+    // Toggle Income/Expense buttons
+    incomeBtn.addEventListener('click', () => {
+      selectedType = 'Income';
+      incomeBtn.classList.add('active');
+      expenseBtn.classList.remove('active');
+    });
+    expenseBtn.addEventListener('click', () => {
+      selectedType = 'Expense';
+      expenseBtn.classList.add('active');
+      incomeBtn.classList.remove('active');
+    });
 
     addTxnBtn.addEventListener('click', () => {
       const date = dateInput.value;
       const desc = descInput.value.trim();
-      const type = typeInput.value;     // NEW
+      const type = selectedType;
       const cat  = catInput.value;
       const amt  = parseFloat(amtInput.value);
 
-      if (!date || !desc || !type || !cat || isNaN(amt)) {
-        return alert('Please fill out all fields, including type.');
+      if (!date || !desc || !cat || isNaN(amt)) {
+        return alert('Please fill out all fields.');
       }
 
       const txn = { date, desc, type, cat, amt };
@@ -180,7 +219,7 @@
       row.innerHTML = `
         <td>${date}</td>
         <td>${desc}</td>
-        <td>${type}</td>           <!-- NEW -->
+        <td>${type}</td>
         <td>${cat}</td>
         <td>$${amt.toFixed(2)}</td>
       `;
@@ -189,15 +228,13 @@
       // clear inputs
       dateInput.value = '';
       descInput.value = '';
-      typeInput.value = '';
-      catInput.value = '';
-      amtInput.value = '';
+      catInput.value  = '';
+      amtInput.value  = '';
 
       // save
       localStorage.setItem('transactions', JSON.stringify(transactions));
     });
 
-    // load saved transactions
     window.addEventListener('DOMContentLoaded', () => {
       const saved = JSON.parse(localStorage.getItem('transactions') || '[]');
       saved.forEach(txn => {
@@ -205,7 +242,7 @@
         row.innerHTML = `
           <td>${txn.date}</td>
           <td>${txn.desc}</td>
-          <td>${txn.type}</td>   <!-- NEW -->
+          <td>${txn.type}</td>
           <td>${txn.cat}</td>
           <td>$${txn.amt.toFixed(2)}</td>
         `;
@@ -216,3 +253,4 @@
   </script>
 </body>
 </html>
+

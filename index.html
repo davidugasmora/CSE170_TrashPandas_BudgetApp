@@ -19,6 +19,7 @@
       --text-color:    var(--pal-darker);
     }
     * { box-sizing: border-box; }
+    html { overflow-y: scroll; }         /* always show vertical scrollbar */
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0; padding: 0;
@@ -35,14 +36,17 @@
     h2 { margin-bottom: 10px; }
     .graph-placeholder {
       border: 1px solid var(--pal-dark);
-      margin: 20px 0; padding: 10px;
+      margin: 20px 0;
+      padding: 10px;
       background: var(--pal-lightest);
       border-radius: 8px;
+      height: 250px;                  /* fixed height to prevent resize jitter */
     }
-    canvas { width:100% !important; height:auto !important; }
-    .overview-boxes {
-      display:flex; gap:10px; margin-top:10px;
+    canvas {
+      width: 100% !important;
+      height: 100% !important;         /* fill the fixed container */
     }
+    .overview-boxes { display:flex; gap:10px; margin-top:10px; }
     .overview-boxes .box {
       background: var(--pal-medium);
       flex:1; height:60px;
@@ -111,9 +115,7 @@
     <div class="transaction-list">
       <table id="recentTable">
         <thead>
-          <tr>
-            <th>Date</th><th>Description</th><th>Category</th><th>Amount</th>
-          </tr>
+          <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -141,84 +143,100 @@
   <script>
     const ctx     = document.getElementById('barChart').getContext('2d');
     const palette = ['#588157','#3A5A40','#344E41','#A3B18A','#DAD7CD'];
-    const chart   = new Chart(ctx, {
+
+    // Spent (colored but no labels), then Remaining (gray + labels)
+    const chart = new Chart(ctx, {
       type: 'bar',
-      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] },
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Spent',
+            data: [],
+            backgroundColor: [],        // colored
+            stack: 'stack',
+            datalabels: { display: false }
+          },
+          {
+            label: 'Remaining',
+            data: [],
+            backgroundColor: [],        // gray
+            stack: 'stack'
+          }
+        ]
+      },
       options: {
+        maintainAspectRatio: false,   // prevent auto-resize on hover
         indexAxis: 'y',
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.x.toFixed(2)}` }},
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: $${ctx.parsed.x.toFixed(2)}`
+            }
+          },
           datalabels: {
-            anchor:'end', align:'end',
-            color:'var(--text-color)', font:{weight:'bold'},
-            formatter: v=>`$${v.toFixed(2)}`
+            anchor: 'end',
+            align: 'end',
+            color: 'var(--text-color)',
+            font: { weight: 'bold' },
+            display: ctx => ctx.dataset.label === 'Remaining',
+            formatter: v => v > 0 ? `$${v.toFixed(2)}` : ''
           }
         },
         responsive: true,
-        scales: { x:{ beginAtZero:true, suggestedMax:100 } }
+        scales: {
+          x: { stacked: true, beginAtZero: true },
+          y: { stacked: true }
+        }
       },
       plugins: [ChartDataLabels]
     });
 
-    function loadBudgetData(){
-      const txns = JSON.parse(localStorage.getItem('transactions')||'[]');
-      if (txns.length){
-        let totalInc = 0, totalExp = 0, catTotals = {};
-        txns.forEach(t=>{
-          if (t.type==='Income') {
-            totalInc += t.amt;
-          } else {
-            totalExp += t.amt;
-            catTotals[t.cat] = (catTotals[t.cat]||0) + t.amt;
-          }
-        });
+    function loadBudgetData() {
+      const saved      = JSON.parse(localStorage.getItem('savedBudget') || 'null');
+      const rawBudgets = saved?.categoryBalances
+                         || JSON.parse(localStorage.getItem('categoryBalances') || '{}');
+      const budgets    = {};
+      for (const [c,v] of Object.entries(rawBudgets)) budgets[c] = Math.abs(v);
 
-        document.getElementById('incomeBox').textContent    = `$${totalInc.toFixed(2)}`;
-        document.getElementById('expenseBox').textContent   = `$${totalExp.toFixed(2)}`;
-        document.getElementById('balanceDisplay').textContent = `$${(totalInc-totalExp).toFixed(2)}`;
-
-        const labels = Object.keys(catTotals);
-        const data   = labels.map(l=>catTotals[l]);
-        chart.data.labels             = labels;
-        chart.data.datasets[0].data   = data;
-        chart.data.datasets[0].backgroundColor = labels.map((_,i)=>palette[i%palette.length]);
-        chart.options.scales.x.suggestedMax = Math.max(...data,1)+50;
-        chart.update();
-      }
-      else {
-        // fallback to savedBudget if no transactions yet
-        const saved = JSON.parse(localStorage.getItem('savedBudget')||'null');
-        let income, expense, cats;
-        if (saved) {
-          income  = saved.totalIncome;
-          expense = saved.totalExpense;
-          cats     = saved.categoryBalances;
-        } else {
-          income  = +localStorage.getItem('totalIncome')||0;
-          expense = +localStorage.getItem('totalExpense')||0;
-          cats     = JSON.parse(localStorage.getItem('categoryBalances')||'{}');
+      const txns = JSON.parse(localStorage.getItem('transactions') || '[]');
+      let totalInc=0, totalExp=0;
+      const spentMap = {};
+      txns.forEach(t => {
+        if (t.type === 'Income') totalInc += t.amt;
+        else {
+          totalExp += t.amt;
+          spentMap[t.cat] = (spentMap[t.cat] || 0) + t.amt;
         }
-        document.getElementById('incomeBox').textContent    = `$${income.toFixed(2)}`;
-        document.getElementById('expenseBox').textContent   = `$${expense.toFixed(2)}`;
-        document.getElementById('balanceDisplay').textContent = `$${(income-expense).toFixed(2)}`;
+      });
 
-        const labels = Object.keys(cats);
-        const data   = labels.map(l=>Math.abs(cats[l]));
-        chart.data.labels             = labels;
-        chart.data.datasets[0].data   = data;
-        chart.data.datasets[0].backgroundColor = labels.map((_,i)=>palette[i%palette.length]);
-        chart.options.scales.x.suggestedMax = Math.max(...data,1)+50;
-        chart.update();
-      }
+      document.getElementById('incomeBox').textContent      = `$${totalInc.toFixed(2)}`;
+      document.getElementById('expenseBox').textContent     = `$${totalExp.toFixed(2)}`;
+      document.getElementById('balanceDisplay').textContent = `$${(totalInc - totalExp).toFixed(2)}`;
+
+      const labels        = Object.keys(budgets);
+      const spentVals     = labels.map(l => Math.min(spentMap[l] || 0, budgets[l]));
+      const remainingVals = labels.map(l => Math.max(budgets[l] - (spentMap[l] || 0), 0));
+
+      const spentColors   = labels.map((_,i) => palette[i % palette.length]);
+      const remainColors  = labels.map(_ => '#cccccc');
+
+      chart.data.labels                          = labels;
+      chart.data.datasets[0].data                = spentVals;
+      chart.data.datasets[0].backgroundColor     = spentColors;
+      chart.data.datasets[1].data                = remainingVals;
+      chart.data.datasets[1].backgroundColor     = remainColors;
+      chart.options.scales.x.max                 = Math.max(...Object.values(budgets)) * 1.1;
+      chart.update();
     }
 
-    function loadRecentTransactions(){
-      const txns = JSON.parse(localStorage.getItem('transactions')||'[]');
-      txns.sort((a,b)=> new Date(b.date)-new Date(a.date));
-      const recent = txns.slice(0,5);
-      const tbody  = document.querySelector('#recentTable tbody');
-      recent.forEach(t=>{
+    function loadRecentTransactions() {
+      const txns = JSON.parse(localStorage.getItem('transactions') || '[]')
+        .sort((a,b) => new Date(b.date) - new Date(a.date))
+        .slice(0,5);
+      const tbody = document.querySelector('#recentTable tbody');
+      txns.forEach(t => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${t.date}</td>
