@@ -29,52 +29,40 @@
       padding: 20px;
       max-width: 414px;
       margin: auto;
-      padding-bottom: 100px; /* room for footer */
+      padding-bottom: 100px;
     }
-    .section-title {
-      font-weight: bold;
-      margin: 20px 0 10px;
-      color: var(--pal-darker);
-    }
-    h2 {
-      margin-bottom: 10px;
-      color: var(--pal-darker);
-    }
+    .section-title { font-weight: bold; margin: 20px 0 10px; }
+    h2 { margin-bottom: 10px; }
     .graph-placeholder {
       border: 1px solid var(--pal-dark);
-      margin: 20px 0;
-      padding: 10px;
+      margin: 20px 0; padding: 10px;
       background: var(--pal-lightest);
       border-radius: 8px;
     }
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-    }
+    canvas { width:100% !important; height:auto !important; }
     .overview-boxes {
-      display: flex; gap: 10px; margin-top: 10px;
+      display:flex; gap:10px; margin-top:10px;
     }
     .overview-boxes .box {
       background: var(--pal-medium);
-      flex: 1; height: 60px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      flex:1; height:60px;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
       color: var(--pal-lightest);
-      font-weight: bold;
-      border-radius: 8px;
+      font-weight:bold;
+      border-radius:8px;
     }
     .transaction-list {
       background: var(--pal-light);
-      padding: 10px; margin-top: 10px;
-      border-radius: 8px;
+      padding:10px; margin-top:10px;
+      border-radius:8px;
     }
     .transaction-list table {
-      width: 100%; border-collapse: collapse; margin-top: 5px;
+      width:100%; border-collapse:collapse; margin-top:5px;
     }
-    .transaction-list th,
-    .transaction-list td {
-      border: 1px solid var(--pal-dark);
-      padding: 6px; text-align: left; font-size: 0.9em;
+    .transaction-list th, .transaction-list td {
+      border:1px solid var(--pal-dark);
+      padding:6px; text-align:left; font-size:0.9em;
     }
     .transaction-list th {
       background: var(--pal-medium);
@@ -82,18 +70,16 @@
     }
     .footer {
       background: var(--pal-darker);
-      padding: 15px;
-      display: flex; justify-content: space-between;
-      align-items: center; gap: 30px;
-      position: fixed; bottom: 0;
-      width: 100%; max-width: 414px;
-      left: 50%; transform: translateX(-50%);
+      padding:15px;
+      display:flex; justify-content:space-between;
+      align-items:center; gap:30px;
+      position:fixed; bottom:0;
+      width:100%; max-width:414px;
+      left:50%; transform:translateX(-50%);
     }
-    .footer a {
-      flex: 1; text-align: center;
-    }
+    .footer a { flex:1; text-align:center; }
     .footer a svg {
-      width: 30px; height: 30px;
+      width:30px; height:30px;
       fill: var(--pal-lightest);
     }
   </style>
@@ -126,10 +112,7 @@
       <table id="recentTable">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
+            <th>Date</th><th>Description</th><th>Category</th><th>Amount</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -139,30 +122,36 @@
 
   <div class="footer">
     <a href="transactions.html" title="Go to Logs">
-      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
+      </svg>
     </a>
     <a href="index.html" title="Go to Dashboard">
-      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
     </a>
     <a href="calculator.html" title="Go to Calculator">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+      </svg>
     </a>
   </div>
 
   <script>
-    const ctx = document.getElementById('barChart').getContext('2d');
+    const ctx     = document.getElementById('barChart').getContext('2d');
     const palette = ['#588157','#3A5A40','#344E41','#A3B18A','#DAD7CD'];
-    const chart = new Chart(ctx, {
+    const chart   = new Chart(ctx, {
       type: 'bar',
       data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] },
       options: {
         indexAxis: 'y',
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: c => `$${c.parsed.x.toFixed(2)}` }},
+          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.x.toFixed(2)}` }},
           datalabels: {
-            anchor: 'end', align: 'end',
-            color: 'var(--text-color)', font:{ weight:'bold' },
+            anchor:'end', align:'end',
+            color:'var(--text-color)', font:{weight:'bold'},
             formatter: v=>`$${v.toFixed(2)}`
           }
         },
@@ -173,42 +162,63 @@
     });
 
     function loadBudgetData(){
-      // try to load the savedBudget first
-      const saved = JSON.parse(localStorage.getItem('savedBudget') || 'null');
-      let income, expense, cats;
-      if (saved) {
-        income  = saved.totalIncome;
-        expense = saved.totalExpense;
-        cats     = saved.categoryBalances;
-      } else {
-        income  = +localStorage.getItem('totalIncome')  || 0;
-        expense = +localStorage.getItem('totalExpense') || 0;
-        cats     = JSON.parse(localStorage.getItem('categoryBalances') || '{}');
+      const txns = JSON.parse(localStorage.getItem('transactions')||'[]');
+      if (txns.length){
+        let totalInc = 0, totalExp = 0, catTotals = {};
+        txns.forEach(t=>{
+          if (t.type==='Income') {
+            totalInc += t.amt;
+          } else {
+            totalExp += t.amt;
+            catTotals[t.cat] = (catTotals[t.cat]||0) + t.amt;
+          }
+        });
+
+        document.getElementById('incomeBox').textContent    = `$${totalInc.toFixed(2)}`;
+        document.getElementById('expenseBox').textContent   = `$${totalExp.toFixed(2)}`;
+        document.getElementById('balanceDisplay').textContent = `$${(totalInc-totalExp).toFixed(2)}`;
+
+        const labels = Object.keys(catTotals);
+        const data   = labels.map(l=>catTotals[l]);
+        chart.data.labels             = labels;
+        chart.data.datasets[0].data   = data;
+        chart.data.datasets[0].backgroundColor = labels.map((_,i)=>palette[i%palette.length]);
+        chart.options.scales.x.suggestedMax = Math.max(...data,1)+50;
+        chart.update();
       }
+      else {
+        // fallback to savedBudget if no transactions yet
+        const saved = JSON.parse(localStorage.getItem('savedBudget')||'null');
+        let income, expense, cats;
+        if (saved) {
+          income  = saved.totalIncome;
+          expense = saved.totalExpense;
+          cats     = saved.categoryBalances;
+        } else {
+          income  = +localStorage.getItem('totalIncome')||0;
+          expense = +localStorage.getItem('totalExpense')||0;
+          cats     = JSON.parse(localStorage.getItem('categoryBalances')||'{}');
+        }
+        document.getElementById('incomeBox').textContent    = `$${income.toFixed(2)}`;
+        document.getElementById('expenseBox').textContent   = `$${expense.toFixed(2)}`;
+        document.getElementById('balanceDisplay').textContent = `$${(income-expense).toFixed(2)}`;
 
-      // update balance boxes
-      document.getElementById('balanceDisplay').textContent = `$${(income - expense).toFixed(2)}`;
-      document.getElementById('incomeBox').textContent    = `$${income.toFixed(2)}`;
-      document.getElementById('expenseBox').textContent   = `$${expense.toFixed(2)}`;
-
-      // populate chart
-      const labels = Object.keys(cats);
-      const data   = labels.map(l => Math.abs(cats[l]));
-      const colors = labels.map((_,i) => palette[i % palette.length]);
-
-      chart.data.labels             = labels;
-      chart.data.datasets[0].data   = data;
-      chart.data.datasets[0].backgroundColor = colors;
-      chart.options.scales.x.suggestedMax = Math.max(...data,1) + 50;
-      chart.update();
+        const labels = Object.keys(cats);
+        const data   = labels.map(l=>Math.abs(cats[l]));
+        chart.data.labels             = labels;
+        chart.data.datasets[0].data   = data;
+        chart.data.datasets[0].backgroundColor = labels.map((_,i)=>palette[i%palette.length]);
+        chart.options.scales.x.suggestedMax = Math.max(...data,1)+50;
+        chart.update();
+      }
     }
 
     function loadRecentTransactions(){
-      const txns = JSON.parse(localStorage.getItem('transactions') || '[]');
-      txns.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      const txns = JSON.parse(localStorage.getItem('transactions')||'[]');
+      txns.sort((a,b)=> new Date(b.date)-new Date(a.date));
       const recent = txns.slice(0,5);
       const tbody  = document.querySelector('#recentTable tbody');
-      recent.forEach(t => {
+      recent.forEach(t=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${t.date}</td>
@@ -227,4 +237,3 @@
   </script>
 </body>
 </html>
-
