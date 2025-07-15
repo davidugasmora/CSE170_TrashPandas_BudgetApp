@@ -73,13 +73,19 @@
     .footer {
       background: var(--pal-darker);
       padding: 15px;
-      display: flex; justify-content: space-between;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      position: fixed; bottom: 0;
+      gap: 30px;
+      position: fixed;
+      bottom: 0;
       width: 100%; max-width: 414px;
       left: 50%; transform: translateX(-50%);
     }
-    .footer a { flex: 1; text-align: center; }
+    .footer a {
+      flex: 1;
+      text-align: center;
+    }
     .footer a svg {
       width: 30px; height: 30px;
       fill: var(--pal-lightest);
@@ -121,20 +127,17 @@
   </div>
 
   <div class="footer">
-    <a href="transactions.html" title="Go to Logs">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/>
-      </svg>
-    </a>
     <a href="index.html" title="Go to Dashboard">
-      <svg viewBox="0 0 24 24">
-        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </a>
+    <a href="transactions.html" title="Go to Logs">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm3 3h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
     </a>
     <a href="calculator.html" title="Go to Calculator">
-      <svg viewBox="0 0 24 24">
-        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-1 2v4H6V5h12zm0 6v8H6v-8h12zm-9 2h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>
+    </a>
+    <a href="settings.html" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7zm7.43-2.5c.04-.33.07-.66.07-1s-.03-.67-.07-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.2l-2.49 1a7.03 7.03 0 0 0-1.73-1L14 2.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5l-.38 2.55a7.03 7.03 0 0 0-1.73 1l-2.49-1a.5.5 0 0 0-.61.2l-2 3.46a.5.5 0 0 0 .12.64L4.57 11c-.04.33-.07.66-.07 1s.03.67.07 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.2l2.49-1a7.03 7.03 0 0 0 1.73 1l.38 2.55a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5l.38-2.55a7.03 7.03 0 0 0 1.73-1l2.49 1a.5.5 0 0 0 .61-.2l2-3.46a.5.5 0 0 0-.12-.64L19.43 13z" fill="var(--pal-lightest)" stroke="var(--pal-darker)" stroke-width="1"/></svg>
     </a>
   </div>
 
